@@ -1,9 +1,6 @@
 # TOUCHING SOUNDS
 
-## HEAD Master Media Design project Musee du Jeux
-
-### What the project is about
-Exploring what story hides behind each of the 4 modern, most known suit symbols, finding out what their historical origins are through the triggering of material, atmospheric sounds. 
+Exploring the historical evolution of card suit symbolism throughout different eras and regions of the world, unveiling what hides behind the 4 French suit symbols by triggering material, atmospheric sounds. 
 
 ### Interaction
 Spinning wheels +  sliding fingers on 3d surfaces.
