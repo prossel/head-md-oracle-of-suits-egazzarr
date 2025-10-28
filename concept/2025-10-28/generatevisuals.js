@@ -13,7 +13,7 @@ class SymbolParticle {
     this.vel = p5.Vector.random2D().mult(random(0.5, 2));
     this.size = 60; // ≈ 1 cm visual scale
     this.birthTime = millis();
-    this.life = 100;
+    this.life = 300;
   }
 
   update() {

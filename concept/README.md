@@ -35,3 +35,19 @@ Spinning wheels +  sliding fingers on 3d surfaces.
 
 - [Urban Lights Contacts (Annecy) - Scenocosme](https://www.youtube.com/watch?v=_97WWZO3QU0) Gregory Lasserre & Anais met den Ancxt
 
+## EVOLUTION of WORK
+
+28 October
+- we decided on a ROUND, 3D prototype of a board made of 4 different materials. 
+- We designed 4 prototyper boards.
+
+| ![](2025-10-28/proto1.png) | ![](2025-10-28/proto2.png) |![](2025-10-28/proto3.png) |![](2025-10-28/proto4.png) |
+|:---------------------:|:-----------------:|:-----------------:|:-----------------:|
+
+- we managed to do color detection of the background image, and start generating visuals. 
+![](2025-10-28.gif)
+- we tested that the camera projections on the hand. 
+
+| ![](testhand1.jpeg) | ![](testhand2.jpeg) |
+|:---------------------:|:-----------------:|
+

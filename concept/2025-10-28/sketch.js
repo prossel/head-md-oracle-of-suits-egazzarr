@@ -101,12 +101,20 @@ if (rightIndexPos) {
 } else {
   rightHoverColor = "Unknown";
 }
-
+  //write on top left corner
+  fill(0);
+  noStroke();
+  textSize(14);
+  textFont('Courier New');
+  textAlign(LEFT, TOP);
+  text(`TOUCHING SOUNDS\n\n\nMove your hand above the wheel \nto discover the history of card suits`, 10, 10);
   // --- Draw symbols ---
   updateAndDrawSymbols();
 
   // --- Overlay UI ---
   drawColorOverlay();
+
+
 }
 
 // === Overlay UI ===
