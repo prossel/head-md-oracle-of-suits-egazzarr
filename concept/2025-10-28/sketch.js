@@ -15,7 +15,7 @@ let leftHoverColor = "Unknown";
 let rightHoverColor = "Unknown";
 
 function preload() {
-  bgImg = loadImage('proto2.png');
+  bgImg = loadImage('proto4.png');
   preloadSymbols(); 
 }
 

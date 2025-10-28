@@ -28,8 +28,9 @@ Spinning wheels +  sliding fingers on 3d surfaces.
 - [Temporary Exhibition "World of sound"](https://explorer.technorama.ch/en/ausstellung/temporary-exhibition-world-of-sound)
 ![](glass.png)
 
-- [Musee de la main](https://www.museedelamain.ch/download/4hqftg.pdf/verdan-depliant-touch-accueil.pdf)Yuan Li
+- [Musee de la main](https://www.museedelamain.ch/download/4hqftg.pdf/verdan-depliant-touch-accueil.pdf) Yuan Li
 ![](projection.png)
+
 - [Magnetic Wall, 2014](https://www.yaelerel.com/projects/magnetic-wall) YAEL EREL 
 ![](magnets.png)
 
