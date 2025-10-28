@@ -7,14 +7,16 @@ let leftHandDetected = false;
 let rightHandDetected = false;
 let leftIndexPos = null;
 let rightIndexPos = null;
+let lastLeftPos = null;
+let lastRightPos = null;
 
 // Color feedback
 let leftHoverColor = "Unknown";
 let rightHoverColor = "Unknown";
 
 function preload() {
-  // Adjust path depending on where your image is relative to HTML
-  bgImg = loadImage('proto1.png');
+  bgImg = loadImage('proto2.png');
+  preloadSymbols(); 
 }
 
 function setup() {
@@ -29,11 +31,12 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
+
 function draw() {
   // --- Draw background ---
   if (bgImg) {
     push();
-    tint(255, 230); // add light transparency so hands stand out
+    tint(255, 230);
     image(bgImg, 0, 0, width, height);
     pop();
   } else {
@@ -48,11 +51,11 @@ function draw() {
   leftIndexPos = null;
   rightIndexPos = null;
 
-  // --- Process MediaPipe detections ---
+  // --- Process hands ---
   if (detections && detections.multiHandLandmarks && detections.multiHandLandmarks.length > 0) {
     for (let i = 0; i < detections.multiHandLandmarks.length; i++) {
       let hand = detections.multiHandLandmarks[i];
-      let handedness = detections.multiHandedness[i].label; // "Left" or "Right"
+      let handedness = detections.multiHandedness[i].label;
       let indexTip = hand[FINGER_TIPS.index];
 
       let fingerPos = {
@@ -60,7 +63,6 @@ function draw() {
         y: indexTip.y * height
       };
 
-      // Store position
       if (handedness === 'Left') {
         leftHandDetected = true;
         leftIndexPos = fingerPos;
@@ -69,30 +71,41 @@ function draw() {
         rightIndexPos = fingerPos;
       }
 
-      // Draw index tip
       drawIndex(hand);
       drawConnections(hand);
     }
   }
 
   // --- Color detection for fingers ---
-  if (leftIndexPos) {
-    let imgPt = canvasToImageCoords(leftIndexPos.x, leftIndexPos.y, bgImg, width, height);
-    let avgRgb = sampleAvgColor(bgImg, imgPt.x, imgPt.y, 5);
-    leftHoverColor = detectColor(rgbToHsv(...avgRgb));
-  } else {
-    leftHoverColor = "Unknown";
-  }
+if (leftIndexPos) {
+  let imgPt = canvasToImageCoords(leftIndexPos.x, leftIndexPos.y, bgImg, width, height);
+  let avgRgb = sampleAvgColor(bgImg, imgPt.x, imgPt.y, 5);
+  leftHoverColor = detectColor(rgbToHsv(...avgRgb));
 
-  if (rightIndexPos) {
-    let imgPt = canvasToImageCoords(rightIndexPos.x, rightIndexPos.y, bgImg, width, height);
-    let avgRgb = sampleAvgColor(bgImg, imgPt.x, imgPt.y, 5);
-    rightHoverColor = detectColor(rgbToHsv(...avgRgb));
-  } else {
-    rightHoverColor = "Unknown";
+  // Continuous emission if on silver
+  if (leftHoverColor === "Silver" && frameCount % 4 === 0) {
+    symbolgen(leftIndexPos.x, leftIndexPos.y);
   }
+} else {
+  leftHoverColor = "Unknown";
+}
 
-  // --- Draw text feedback ---
+if (rightIndexPos) {
+  let imgPt = canvasToImageCoords(rightIndexPos.x, rightIndexPos.y, bgImg, width, height);
+  let avgRgb = sampleAvgColor(bgImg, imgPt.x, imgPt.y, 5);
+  rightHoverColor = detectColor(rgbToHsv(...avgRgb));
+
+  if (rightHoverColor === "Silver" && frameCount % 4 === 0) {
+    symbolgen(rightIndexPos.x, rightIndexPos.y);
+  }
+} else {
+  rightHoverColor = "Unknown";
+}
+
+  // --- Draw symbols ---
+  updateAndDrawSymbols();
+
+  // --- Overlay UI ---
   drawColorOverlay();
 }
 
