@@ -2,6 +2,8 @@
 let videoElement;
 // if detections is null it means no hands detected
 let detections = null;
+let cam;
+let offscreen; // p5 graphics buffer for flipped frames
 
 // Create the Hands instance and provide a tiny init helper.
 if (!window.hands) {
@@ -48,22 +50,32 @@ window.initHands = (opts = {}) => {
 };
 
 function setupVideo(selfieMode = true) {
-    // create a hidden video element that MediaPipe Camera util will use
-    videoElement = createCapture(VIDEO, { flipped: selfieMode });
-    videoElement.size(640, 480);
-    videoElement.hide();
+  videoElement = createCapture(VIDEO);
+  videoElement.size(640, 480);
+  videoElement.hide();
 
-    // Use MediaPipe Camera util to feed frames from the p5 video element
-    // cameraUtils expects a DOM video element; p5's capture has an elt property
-    cam = new Camera(videoElement.elt, {
-        onFrame: async () => {
-            await hands.send({ image: videoElement.elt });
-        },
-        width: 640,
-        height: 480
-    });
+  offscreen = createGraphics(640, 480); // canvas to draw mirrored frame
 
-    cam.start();
+  cam = new Camera(videoElement.elt, {
+    onFrame: async () => {
+      // Draw the frame mirrored onto the offscreen buffer
+      if (selfieMode) {
+        offscreen.push();
+        offscreen.translate(offscreen.width, 0);
+        offscreen.scale(-1, 1);
+        offscreen.image(videoElement, 0, 0, offscreen.width, offscreen.height);
+        offscreen.pop();
+
+        await hands.send({ image: offscreen.elt }); // send flipped frame
+      } else {
+        await hands.send({ image: videoElement.elt }); // send normal frame
+      }
+    },
+    width: 640,
+    height: 480
+  });
+
+  cam.start();
 }
 
 function setupHands() {
