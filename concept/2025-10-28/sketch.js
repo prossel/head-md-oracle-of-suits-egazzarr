@@ -43,14 +43,18 @@ function windowResized() {
 
 
 function draw() {
-  // --- Background (safe even if missing) ---
+  // --- White background ---
+  background(255);
+  
+  // --- Background image (square, centered, keeping proportions) ---
   if (bgImg) {
     push();
     tint(255, 230);
-    image(bgImg, 0, 0, width, height);
+    // Make it square based on height, centered horizontally
+    let imgSize = height;
+    let imgX = (width - imgSize) / 2;
+    image(bgImg, imgX, 0, imgSize, imgSize);
     pop();
-  } else {
-    background(255); // Pure white fallback
   }
 
   // Always draw the circle overlay
