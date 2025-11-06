@@ -14,8 +14,11 @@ let lastRightPos = null;
 let leftHoverColor = "Unknown";
 let rightHoverColor = "Unknown";
 
-// Track if any finger is in Q1
+// Track previous quadrant states
 let wasInQ1 = false;
+let wasInQ2 = false;
+let wasInQ3 = false;
+let wasInQ4 = false;
 
 function preload() {
   preloadSymbols();
@@ -54,11 +57,24 @@ function draw() {
     push();
     tint(255, 230);
     // Make it square based on height, centered horizontally
-    let imgSize = height;
+    let imgSize = height * 0.9; // 0.8 * 0.9 = 0.72
     let imgX = (width - imgSize) / 2;
-    image(bgImg, imgX, 0, imgSize, imgSize);
+    let imgY = (height - imgSize) / 2;
+    image(bgImg, imgX, imgY, imgSize, imgSize);
     pop();
   }
+
+  // Create circular mask - only show content inside largest circle
+  const diameter = height * 4 / 5;
+  const cx = width / 2;
+  const cy = height / 2;
+  
+  // Draw everything that needs masking
+  push();
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.arc(cx, cy, diameter / 2, 0, TWO_PI);
+  drawingContext.clip();
 
   // Always draw the circle overlay
   drawCircleWithNumbers();
@@ -232,17 +248,21 @@ function draw() {
   if (wasInQ1 && !currentlyInQ1 && window.isQ1Playing && window.isQ1Playing()) {
     window.stopQ1();
   }
-  if (!currentlyInQ2 && window.isQ2Playing && window.isQ2Playing()) {
+  if (wasInQ2 && !currentlyInQ2 && window.isQ2Playing && window.isQ2Playing()) {
     window.fadeOutQ2(600);
   }
-  if (!currentlyInQ3 && window.isQ3Playing && window.isQ3Playing()) {
+  if (wasInQ3 && !currentlyInQ3 && window.isQ3Playing && window.isQ3Playing()) {
     window.stopQ3();
   }
-  if (!currentlyInQ4 && window.isQ4Playing && window.isQ4Playing()) {
+  if (wasInQ4 && !currentlyInQ4 && window.isQ4Playing && window.isQ4Playing()) {
     window.stopQ4();
   }
   
+  // Update previous state
   wasInQ1 = currentlyInQ1;
+  wasInQ2 = currentlyInQ2;
+  wasInQ3 = currentlyInQ3;
+  wasInQ4 = currentlyInQ4;
 
   /* // --- Color detection for fingers ---
 if (leftIndexPos) {
@@ -269,6 +289,15 @@ if (rightIndexPos) {
 } else {
   rightHoverColor = "Unknown";
 } */
+  
+  // --- Draw trail symbols (snake formation) ---
+  updateAndDrawTrail();
+
+  // End circular mask
+  drawingContext.restore();
+  pop();
+
+  // --- Overlay UI (outside the mask) ---
   //write on top left corner
   fill(255,0,0);
   noStroke();
@@ -277,10 +306,6 @@ if (rightIndexPos) {
   textAlign(LEFT, TOP);
   text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
   
-  // --- Draw trail symbols (snake formation) ---
-  updateAndDrawTrail();
-
-  // --- Overlay UI ---
   /* drawColorOverlay(); */
 
 

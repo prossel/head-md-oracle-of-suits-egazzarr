@@ -48,7 +48,7 @@
   // ============ Q1: MONOSYNTH - Sustained notes changing with years ============
   window.playQ1 = function() {
     if (!ready || isQ1Playing) return;
-    q1Synth = Monosynth({ attack: 44, decay: 44100 }).connect();
+    q1Synth = Monosynth({ gain: .8, attack: 44, decay: 44100 }).connect();
     q1Synth.note(110);
     isQ1Playing = true;
   };
@@ -78,7 +78,7 @@
     
     // Use FM for a softer, different timbre
     q2Synth = FM({ 
-      gain: .2,  // Very soft
+      gain: .8,  // Louder
       attack: 220,
       decay: 8820,
       cmRatio: 2.01,
@@ -159,7 +159,7 @@
   window.playQ3 = function() {
     if (!ready || isQ3Playing) return;
     
-    q3Kick = Kick().connect();
+    q3Kick = Kick({ gain: .8 }).connect();
     q3Seq = Sequencer({ 
       target: q3Kick, 
       key: 'note', 
@@ -215,7 +215,7 @@
     q4Chorus = Chorus().connect(q4Verb);
     
     q4Fm = PolyFM({ 
-      gain: .15,
+      gain: .8,
       cmRatio: 1.01,
       index: 1.2,
       carrierWaveform: 'triangle',

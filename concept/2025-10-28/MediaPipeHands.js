@@ -60,17 +60,26 @@ function setupVideo(selfieMode = true) {
 
   cam = new Camera(videoElement.elt, {
     onFrame: async () => {
-      // Draw the frame mirrored onto the offscreen buffer
+      // Draw the frame mirrored and zoomed onto the offscreen buffer
       if (selfieMode) {
         offscreen.push();
-        offscreen.translate(offscreen.width, 0);
-        offscreen.scale(-1, 1);
+        offscreen.translate(offscreen.width / 2, offscreen.height / 2);
+        offscreen.scale(-1.5, 1.5); // 50% zoom = 1.5x scale, mirrored
+        offscreen.translate(-offscreen.width / 2, -offscreen.height / 2);
         offscreen.image(videoElement, 0, 0, offscreen.width, offscreen.height);
         offscreen.pop();
 
-        await hands.send({ image: offscreen.elt }); // send flipped frame
+        await hands.send({ image: offscreen.elt }); // send flipped and zoomed frame
       } else {
-        await hands.send({ image: videoElement.elt }); // send normal frame
+        // Non-selfie mode with zoom
+        offscreen.push();
+        offscreen.translate(offscreen.width / 2, offscreen.height / 2);
+        offscreen.scale(1.5, 1.5); // 50% zoom = 1.5x scale
+        offscreen.translate(-offscreen.width / 2, -offscreen.height / 2);
+        offscreen.image(videoElement, 0, 0, offscreen.width, offscreen.height);
+        offscreen.pop();
+        
+        await hands.send({ image: offscreen.elt }); // send zoomed frame
       }
     },
     width: 640,
