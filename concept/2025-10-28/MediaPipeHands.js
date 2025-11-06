@@ -49,7 +49,9 @@ window.initHands = (opts = {}) => {
     return window.hands;
 };
 
-function setupVideo(selfieMode = true) {
+  // NO MIRROR if using webcam
+
+/* function setupVideo(selfieMode = true) {
   videoElement = createCapture(VIDEO);
   videoElement.size(640, 480);
   videoElement.hide();
@@ -76,7 +78,29 @@ function setupVideo(selfieMode = true) {
   });
 
   cam.start();
+} */
+
+  // NO MIRROR if using laptop directly
+  function setupVideo(selfieMode = true) {
+  videoElement = createCapture(VIDEO);
+  videoElement.size(640, 480);
+  videoElement.hide();
+
+  offscreen = createGraphics(640, 480);
+
+  cam = new Camera(videoElement.elt, {
+    onFrame: async () => {
+      // Send the normal frame directly without flipping
+      await hands.send({ image: videoElement.elt });
+    },
+    width: 640,
+    height: 480
+  });
+
+  cam.start();
 }
+
+
 
 function setupHands() {
 

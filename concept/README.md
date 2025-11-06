@@ -52,3 +52,28 @@ Spinning wheels +  sliding fingers on 3d surfaces.
 | ![](testhand1.jpeg) | ![](testhand2.jpeg) |
 |:---------------------:|:-----------------:|
 
+04 November
+
+- we tries to do a paper mache workshop, with air baloons stuck on a round surface. We realised it was going to be too messy and the layers would take days to dry out, so we went to the prototyper workshop and discussed materials with them. 
+![alt text](gold-1.jpeg)
+
+There are 3 printing/engraving techniques, other than the 3D printing whihc would take too long:
+1. ZUND - only sharp edges, but goes deep
+
+2. LASER - doesn't go very deep, so hard to make a "material"
+
+3. CNC - 1mx0.5m machine, fast and can cut smooth surfaces (Blender like)
+
+In terms of materials, the prices are as follow: 
+
+| ![](ateliers/lab.jpeg) | ![](ateliers/plexi.jpeg) |![](ateliers/zund.jpeg) |![](ateliers/laser.jpeg) |![](ateliers/cnc.jpeg) |
+|:---------------------:|:-----------------:|:-----------------:|:-----------------:|:-----------------:|
+
+We decided to print in LAB/Planche Usinable, which is cheap and thick, and not to stick materials on top of the round board, but rather make the consistencies with various patterns. In this way, the projector will be more able to project visuals on it as well. 
+
+We need to do:
+- making some 3d model surfaces in Blender
+- prodce the sound in Gibberish so that it beatmatch when 4 people play at the same time. The sound tests are showing how to change the speed of a song as we move through centuries is hard, whereas changing its note is easier. 
+- think about map identity
+
+

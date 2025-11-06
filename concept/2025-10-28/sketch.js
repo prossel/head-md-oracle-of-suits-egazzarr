@@ -15,8 +15,17 @@ let leftHoverColor = "Unknown";
 let rightHoverColor = "Unknown";
 
 function preload() {
-  bgImg = loadImage('proto1.png');
-  preloadSymbols(); 
+  preloadSymbols();
+
+  // Try to load the image, but don't crash if missing
+  bgImg = loadImage(
+    'line_art.png',
+    () => console.log("Background loaded"),
+    () => {
+      console.warn("line_art.png not found — using plain white background");
+      bgImg = null; // Just mark as missing
+    }
+  );
 }
 
 function setup() {
@@ -32,16 +41,20 @@ function windowResized() {
 }
 
 
+
 function draw() {
-  // --- Draw background ---
+  // --- Background (safe even if missing) ---
   if (bgImg) {
     push();
     tint(255, 230);
     image(bgImg, 0, 0, width, height);
     pop();
   } else {
-    background(255);
+    background(255); // Pure white fallback
   }
+
+  // Always draw the circle overlay
+  drawCircleWithNumbers();
 
   strokeWeight(2);
 
@@ -75,8 +88,41 @@ function draw() {
       drawConnections(hand);
     }
   }
+  drawQuadrantOverlay();
 
-  // --- Color detection for fingers ---
+  // --- Draw red indicator dot before hand is detected (Q3, 1200 ring) ---
+  if (!leftHandDetected && !rightHandDetected) {
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = (height * 4 / 5) / 2;
+    const r1200 = map(1, 0, 6, radius * 0.1, radius * 0.9); // 1200 is index 1
+    
+    // Q3: bottom-left (negative x, positive y from center in screen coords)
+    const offset = r1200 / sqrt(2); // 45 degree diagonal
+    const dotX = cx - offset; // left
+    const dotY = cy + offset; // bottom (screen Y increases downward)
+    
+    fill(255, 0, 0, 200); // red, alpha 0.5
+    noStroke();
+    ellipse(dotX, dotY, 30, 30);
+  }
+
+  // --- Generate snake trail symbols based on finger position and quadrant ---
+  if (leftIndexPos) {
+    const leftQuadrant = getQuadrant(leftIndexPos);
+    if (leftQuadrant !== "None") {
+      symbolgenTrail(leftIndexPos.x, leftIndexPos.y, leftQuadrant);
+    }
+  }
+
+  if (rightIndexPos) {
+    const rightQuadrant = getQuadrant(rightIndexPos);
+    if (rightQuadrant !== "None") {
+      symbolgenTrail(rightIndexPos.x, rightIndexPos.y, rightQuadrant);
+    }
+  }
+
+  /* // --- Color detection for fingers ---
 if (leftIndexPos) {
   let imgPt = canvasToImageCoords(leftIndexPos.x, leftIndexPos.y, bgImg, width, height);
   let avgRgb = sampleAvgColor(bgImg, imgPt.x, imgPt.y, 5);
@@ -100,24 +146,153 @@ if (rightIndexPos) {
   }
 } else {
   rightHoverColor = "Unknown";
-}
+} */
   //write on top left corner
-  fill(0);
+  fill(255,0,0);
   noStroke();
   textSize(14);
   textFont('Courier New');
   textAlign(LEFT, TOP);
-  text(`TOUCHING SOUNDS\n\n\nMove your hand above the wheel \nto discover the history of card suits`, 10, 10);
-  // --- Draw symbols ---
-  updateAndDrawSymbols();
+  text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
+  
+  // --- Draw trail symbols (snake formation) ---
+  updateAndDrawTrail();
 
   // --- Overlay UI ---
-  drawColorOverlay();
+  /* drawColorOverlay(); */
 
 
 }
 
-// === Overlay UI ===
+function getQuadrant(fingerPos) {
+  if (!fingerPos) return "None";
+
+  const cx = width / 2;
+  const cy = height / 2;
+
+  const dx = fingerPos.x - cx;
+  const dy = cy - fingerPos.y; // invert y because p5 y increases downwards
+
+  if (dx >= 0 && dy >= 0) return "1"; // top-right
+  if (dx < 0 && dy >= 0) return "2";  // top-left
+  if (dx < 0 && dy < 0) return "3";   // bottom-left
+  if (dx >= 0 && dy < 0) return "4";  // bottom-right
+
+  return "Unknown";
+}
+
+function drawCircleWithNumbers() {
+  const diameter = height * 4 / 5;
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = diameter / 2;
+
+  // main circle outline
+  noFill();
+  stroke(0);
+  strokeWeight(2);
+  ellipse(cx, cy, diameter, diameter);
+
+  // quadrant cross
+  line(cx - radius, cy, cx + radius, cy);
+  line(cx, cy - radius, cx, cy + radius);
+
+  // --- concentric circles with years ---
+  const years = [1100, 1200, 1300, 1400, 1500, 1600, 1700];
+  const ringCount = years.length;
+
+  // All rings in black
+  stroke(0);
+  strokeWeight(1);
+  noFill();
+  
+  for (let i = 0; i < ringCount; i++) {
+    const r = map(i, 0, ringCount - 1, radius * 0.1, radius * 0.9);
+    ellipse(cx, cy, r * 2, r * 2);
+  }
+
+  // Draw year labels radially in each quadrant, readable from that side
+  // Q1: bottom edge (right side) - readable from bottom
+  // Q2: bottom edge (left side) - readable from bottom  
+  // Q3: top edge (left side) - readable from top
+  // Q4: top edge (right side) - readable from top
+  
+  noStroke();
+  fill(0);
+  textSize(14);
+  
+  for (let i = 0; i < ringCount; i++) {
+    const r = map(i, 0, ringCount - 1, radius * 0.1, radius * 0.9);
+    const yearText = years[i].toString();
+    const offset = 15; // distance from circle line
+    
+    // Q1: Top-right quadrant (45°) - text readable from right side
+    push();
+    translate(cx + r * cos(PI/4), cy + r * sin(PI/4) + offset);
+    rotate(0); // horizontal, readable from right
+    textAlign(CENTER, TOP);
+    text(yearText, 0, 0);
+    pop();
+    
+    // Q2: Top-left quadrant (135°) - text readable from left side
+    push();
+    translate(cx + r * cos(3*PI/4), cy + r * sin(3*PI/4) + offset);
+    rotate(0); // horizontal, readable from left
+    textAlign(CENTER, TOP);
+    text(yearText, 0, 0);
+    pop();
+    
+    // Q3: Bottom-left quadrant (225°) - text readable from left side
+    push();
+    translate(cx + r * cos(-3*PI/4), cy + r * sin(-3*PI/4) - offset);
+    rotate(0); // horizontal, readable from left
+    textAlign(CENTER, BOTTOM);
+    text(yearText, 0, 0);
+    pop();
+    
+    // Q4: Bottom-right quadrant (315°) - text readable from right side
+    push();
+    translate(cx + r * cos(-PI/4), cy + r * sin(-PI/4) - offset);
+    rotate(0); // horizontal, readable from right
+    textAlign(CENTER, BOTTOM);
+    text(yearText, 0, 0);
+    pop();
+  }
+}
+
+// --- Overlay: show which quadrant each finger is in ---
+function drawQuadrantOverlay() {
+  const pad = 12;
+  const leftQuadrant = getQuadrant(leftIndexPos);
+  const rightQuadrant = getQuadrant(rightIndexPos);
+
+  const lines = [
+    `Left: Q${leftQuadrant}`,
+    `Right: Q${rightQuadrant}`
+  ];
+
+  textSize(18);
+  textAlign(RIGHT, BOTTOM);
+
+  let boxW = max(textWidth(lines[0]), textWidth(lines[1])) + pad * 2;
+  let boxH = lines.length * 22 + pad;
+
+  noStroke();
+  fill(0, 150);
+  rect(width - boxW - 20, height - boxH - 20, boxW, boxH, 8);
+
+  fill(255);
+  for (let i = 0; i < lines.length; i++) {
+    text(
+      lines[i],
+      width - 20 - pad / 2,
+      height - 20 - (lines.length - 1 - i) * 22 - pad / 2
+    );
+  }
+}
+
+
+/* 
 function drawColorOverlay() {
   const pad = 12;
   const lines = [
@@ -144,3 +319,4 @@ function drawColorOverlay() {
     );
   }
 }
+ */
