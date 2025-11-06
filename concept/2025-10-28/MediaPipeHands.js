@@ -64,7 +64,7 @@ function setupVideo(selfieMode = true) {
       if (selfieMode) {
         offscreen.push();
         offscreen.translate(offscreen.width / 2, offscreen.height / 2);
-        offscreen.scale(-1.5, 1.5); // 50% zoom = 1.5x scale, mirrored
+        offscreen.scale(-2, 2); // 70% zoom = 1.7x scale, mirrored
         offscreen.translate(-offscreen.width / 2, -offscreen.height / 2);
         offscreen.image(videoElement, 0, 0, offscreen.width, offscreen.height);
         offscreen.pop();
@@ -74,7 +74,7 @@ function setupVideo(selfieMode = true) {
         // Non-selfie mode with zoom
         offscreen.push();
         offscreen.translate(offscreen.width / 2, offscreen.height / 2);
-        offscreen.scale(1.5, 1.5); // 50% zoom = 1.5x scale
+        offscreen.scale(2, 2); // 70% zoom = 1.7x scale
         offscreen.translate(-offscreen.width / 2, -offscreen.height / 2);
         offscreen.image(videoElement, 0, 0, offscreen.width, offscreen.height);
         offscreen.pop();

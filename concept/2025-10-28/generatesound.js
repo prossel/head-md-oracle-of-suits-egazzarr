@@ -119,10 +119,12 @@
   window.fadeOutQ2 = function(duration = 600) {
     if (!q2Synth || !isQ2Playing) return;
     
+    // Stop sequencer immediately to prevent new notes
+    if (q2Seq) q2Seq.stop();
+    
     const startGain = q2Synth.gain;
     const startTime = Date.now();
     const synth = q2Synth;
-    const seq = q2Seq;
     
     const fadeInterval = setInterval(() => {
       if (!synth) {
@@ -136,7 +138,6 @@
       
       if (progress >= 1) {
         clearInterval(fadeInterval);
-        if (seq) seq.stop();
         synth.disconnect();
         isQ2Playing = false;
         q2Synth = null;

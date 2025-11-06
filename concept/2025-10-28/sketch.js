@@ -49,8 +49,18 @@ function windowResized() {
 
 
 function draw() {
-  // --- White background ---
-  background(255);
+  // --- Black background everywhere ---
+  background(0);
+  
+  // Create circular area constants
+  const diameter = height * 4 / 5;
+  const cx = width / 2;
+  const cy = height / 2;
+  
+  // --- White circle background ---
+  fill(255);
+  noStroke();
+  ellipse(cx, cy, diameter, diameter);
   
   // --- Background image (square, centered, keeping proportions) ---
   if (bgImg) {
@@ -60,14 +70,18 @@ function draw() {
     let imgSize = height * 0.9; // 0.8 * 0.9 = 0.72
     let imgX = (width - imgSize) / 2;
     let imgY = (height - imgSize) / 2;
+    
+    // Clip background image to circle
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.arc(cx, cy, diameter / 2, 0, TWO_PI);
+    drawingContext.clip();
     image(bgImg, imgX, imgY, imgSize, imgSize);
+    drawingContext.restore();
     pop();
   }
 
   // Create circular mask - only show content inside largest circle
-  const diameter = height * 4 / 5;
-  const cx = width / 2;
-  const cy = height / 2;
   
   // Draw everything that needs masking
   push();
@@ -358,53 +372,28 @@ function drawCircleWithNumbers() {
     ellipse(cx, cy, r * 2, r * 2);
   }
 
-  // Draw year labels radially in each quadrant, readable from that side
-  // Q1: bottom edge (right side) - readable from bottom
-  // Q2: bottom edge (left side) - readable from bottom  
-  // Q3: top edge (left side) - readable from top
-  // Q4: top edge (right side) - readable from top
+  // Draw year labels only in Q4
   
   noStroke();
   fill(0);
   textSize(14);
+  textStyle(BOLD); // Make text thicker
   
   for (let i = 0; i < ringCount; i++) {
     const r = map(i, 0, ringCount - 1, radius * 0.1, radius * 0.9);
     const yearText = years[i].toString();
     const offset = 15; // distance from circle line
     
-    // Q1: Top-right quadrant (45°) - text readable from right side
+    // Q4: Bottom-right quadrant (315° in screen coords = positive x, positive y from center)
     push();
     translate(cx + r * cos(PI/4), cy + r * sin(PI/4) + offset);
     rotate(0); // horizontal, readable from right
     textAlign(CENTER, TOP);
     text(yearText, 0, 0);
     pop();
-    
-    // Q2: Top-left quadrant (135°) - text readable from left side
-    push();
-    translate(cx + r * cos(3*PI/4), cy + r * sin(3*PI/4) + offset);
-    rotate(0); // horizontal, readable from left
-    textAlign(CENTER, TOP);
-    text(yearText, 0, 0);
-    pop();
-    
-    // Q3: Bottom-left quadrant (225°) - text readable from left side
-    push();
-    translate(cx + r * cos(-3*PI/4), cy + r * sin(-3*PI/4) - offset);
-    rotate(0); // horizontal, readable from left
-    textAlign(CENTER, BOTTOM);
-    text(yearText, 0, 0);
-    pop();
-    
-    // Q4: Bottom-right quadrant (315°) - text readable from right side
-    push();
-    translate(cx + r * cos(-PI/4), cy + r * sin(-PI/4) - offset);
-    rotate(0); // horizontal, readable from right
-    textAlign(CENTER, BOTTOM);
-    text(yearText, 0, 0);
-    pop();
   }
+  
+  textStyle(NORMAL); // Reset text style
 }
 
 // --- Overlay: show which quadrant each finger is in ---
