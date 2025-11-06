@@ -51,7 +51,7 @@ window.initHands = (opts = {}) => {
 
   // NO MIRROR if using webcam
 
-/* function setupVideo(selfieMode = true) {
+function setupVideo(selfieMode = true) {
   videoElement = createCapture(VIDEO);
   videoElement.size(640, 480);
   videoElement.hide();
@@ -78,10 +78,10 @@ window.initHands = (opts = {}) => {
   });
 
   cam.start();
-} */
+}
 
   // NO MIRROR if using laptop directly
-  function setupVideo(selfieMode = true) {
+/*   function setupVideo(selfieMode = true) {
   videoElement = createCapture(VIDEO);
   videoElement.size(640, 480);
   videoElement.hide();
@@ -99,7 +99,7 @@ window.initHands = (opts = {}) => {
 
   cam.start();
 }
-
+ */
 
 
 function setupHands() {
