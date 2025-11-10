@@ -38,7 +38,7 @@ Spinning wheels +  sliding fingers on 3d surfaces.
 
 ## EVOLUTION of WORK
 
-28 October
+### 28 October
 - we decided on a ROUND, 3D prototype of a board made of 4 different materials. 
 - We designed 4 prototyper boards.
 
@@ -52,7 +52,7 @@ Spinning wheels +  sliding fingers on 3d surfaces.
 | ![](testhand1.jpeg) | ![](testhand2.jpeg) |
 |:---------------------:|:-----------------:|
 
-04 November
+### 04 November
 
 - we tries to do a paper mache workshop, with air baloons stuck on a round surface. We realised it was going to be too messy and the layers would take days to dry out, so we went to the prototyper workshop and discussed materials with them. 
 ![alt text](gold-1.jpeg)
@@ -75,5 +75,25 @@ We need to do:
 - making some 3d model surfaces in Blender
 - prodce the sound in Gibberish so that it beatmatch when 4 people play at the same time. The sound tests are showing how to change the speed of a song as we move through centuries is hard, whereas changing its note is easier. 
 - think about map identity
+
+### 05 November
+
+Blender models shown to the CNC workshop. They say it will not work, therefore working in Fusion. 
+| ![](40cm_top.png) | ![](40cm.png) |
+|:---------------------:|:-----------------:|
+
+Test version working in STL file on 3D printer for test day. 
+| ![](simple1.png) | ![](simple2.png) |
+|:---------------------:|:-----------------:|
+
+
+### 6 November - User Tests
+
+- date lines look like mountian heights - maybe add in 2025/present
+- we need the 3d model to make people understand how to touch - shall we consider Z distance in finger detection?
+- we need an explanatory screen to introduce the story
+- the projection is off and it lags the movement of hands
+- the music was working well
+
 
 
