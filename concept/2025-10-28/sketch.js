@@ -47,7 +47,6 @@ function windowResized() {
 }
 
 
-
 function draw() {
   // --- White background everywhere ---
   background(255);
@@ -80,7 +79,7 @@ function draw() {
   // Always draw the circle overlay
   drawCircleWithNumbers();
 
-  strokeWeight(2);
+  strokeWeight(1);
 
   // Reset flags
   leftHandDetected = false;
@@ -302,7 +301,7 @@ if (rightIndexPos) {
 
   // --- Overlay UI (outside the mask) ---
   //write on top left corner
-  fill(255,0,0);
+  fill(255);
   noStroke();
   textSize(14);
   textFont('Courier New');
@@ -356,7 +355,7 @@ function drawCircleWithNumbers() {
   // main circle outline
   noFill();
   stroke(0);
-  strokeWeight(2);
+  strokeWeight(1);
   ellipse(cx, cy, diameter, diameter);
 
   // quadrant cross
@@ -367,9 +366,7 @@ function drawCircleWithNumbers() {
   const years = [1100, 1200, 1300, 1400, 1500, 1600, 1700];
   const ringCount = years.length;
 
-  // All rings in black
-  stroke(0);
-  strokeWeight(1);
+  // All rings in white
   noFill();
   
   for (let i = 0; i < ringCount; i++) {
@@ -379,8 +376,6 @@ function drawCircleWithNumbers() {
 
   // Draw year labels only in Q4
   
-  noStroke();
-  fill(0);
   textSize(14);
   textStyle(BOLD); // Make text thicker
   
@@ -419,10 +414,10 @@ function drawQuadrantOverlay() {
   let boxH = lines.length * 22 + pad;
 
   noStroke();
-  fill(0, 150);
+  fill(255, 150);
   rect(width - boxW - 20, height - boxH - 20, boxW, boxH, 8);
 
-  fill(255);
+  fill(0);
   for (let i = 0; i < lines.length; i++) {
     text(
       lines[i],

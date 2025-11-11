@@ -95,5 +95,13 @@ Test version working in STL file on 3D printer for test day.
 - the projection is off and it lags the movement of hands
 - the music was working well
 
+### 11 November 
+
+- generating videos to project on the surface for a better user journey. 
+- the 3D model is taking a lot of time. DISCLAIMER: spent the day with the CNC machine and the girl setting up my Fusion 3D model. We decided use the LAB material because they told us it was 4 CHF per metre squared. Turned out it was 500CHF per metre squared, quite a difference. So I cut my model in 9 parts and used the 3D printer to make it. 
+
+| ![](model_3d_2.png) | ![](model_3d_1.png) |![](model_3d.png) |
+|:---------------------:|:-----------------:|:-----------------:|
+
 
 

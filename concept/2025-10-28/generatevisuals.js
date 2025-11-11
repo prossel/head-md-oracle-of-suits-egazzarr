@@ -41,6 +41,8 @@ function preloadSymbols() {
   });
 }
 
+
+
 class SymbolParticle {
   constructor(x, y, img) {
     this.pos = createVector(x, y);
@@ -160,17 +162,24 @@ class TrailSymbol {
     this.birthTime = millis();
     this.fadeTime = 2000; // 2 seconds fade
     this.img = img;
+    this.alpha = 255; // Cache alpha value
   }
 
   draw() {
     if (!this.img) return;
     
-    let age = millis() - this.birthTime;
-    let alpha = map(age, 0, this.fadeTime, 255, 0);
-    alpha = constrain(alpha, 0, 255);
+    // Only recalculate alpha every 3 frames to reduce CPU
+    if (frameCount % 3 === 0) {
+      let age = millis() - this.birthTime;
+      this.alpha = map(age, 0, this.fadeTime, 255, 0);
+      this.alpha = constrain(this.alpha, 0, 255);
+    }
+    
+    // Skip drawing if nearly invisible
+    if (this.alpha < 10) return;
     
     push();
-    tint(255, alpha);
+    tint(255, this.alpha);
     image(this.img, this.pos.x - this.size / 2, this.pos.y - this.size / 2, this.size, this.size);
     pop();
   }
@@ -203,12 +212,13 @@ function symbolgenTrail(x, y, quadrant) {
   }
   
   if (img) {
-    symbolTrail.push(new TrailSymbol(x, y, img));
-    
-    // Keep trail at maximum length
-    if (symbolTrail.length > maxTrailLength) {
-      symbolTrail.shift(); // Remove oldest symbol
+    // Keep trail at maximum length - remove from end instead of shift (more efficient)
+    if (symbolTrail.length >= maxTrailLength) {
+      symbolTrail.pop(); // Remove oldest symbol (at end of array)
     }
+    
+    // Add new symbol at beginning
+    symbolTrail.unshift(new TrailSymbol(x, y, img));
     
     // Update last position
     lastTrailPos.x = x;
@@ -217,10 +227,19 @@ function symbolgenTrail(x, y, quadrant) {
 }
 
 function updateAndDrawTrail() {
+  // Draw and clean up in one pass (more efficient)
   for (let i = symbolTrail.length - 1; i >= 0; i--) {
     let s = symbolTrail[i];
-    s.draw();
-    if (s.isDead()) symbolTrail.splice(i, 1);
+    if (s.isDead()) {
+      symbolTrail.splice(i, 1);
+    } else {
+      s.draw();
+    }
+  }
+  
+  // Limit cleanup to once every 30 frames if trail is too long
+  if (frameCount % 30 === 0 && symbolTrail.length > maxTrailLength * 1.5) {
+    symbolTrail = symbolTrail.slice(0, maxTrailLength);
   }
 }
 
