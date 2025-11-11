@@ -49,18 +49,13 @@ function windowResized() {
 
 
 function draw() {
-  // --- Black background everywhere ---
-  background(0);
+  // --- White background everywhere ---
+  background(255);
   
   // Create circular area constants
   const diameter = height * 4 / 5;
   const cx = width / 2;
   const cy = height / 2;
-  
-  // --- White circle background ---
-  fill(255);
-  noStroke();
-  ellipse(cx, cy, diameter, diameter);
   
   // --- Background image (square, centered, keeping proportions) ---
   if (bgImg) {
@@ -81,14 +76,6 @@ function draw() {
     pop();
   }
 
-  // Create circular mask - only show content inside largest circle
-  
-  // Draw everything that needs masking
-  push();
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.arc(cx, cy, diameter / 2, 0, TWO_PI);
-  drawingContext.clip();
 
   // Always draw the circle overlay
   drawCircleWithNumbers();
@@ -108,10 +95,17 @@ function draw() {
       let handedness = detections.multiHandedness[i].label;
       let indexTip = hand[FINGER_TIPS.index];
 
-      let fingerPos = {
-        x: indexTip.x * width,
-        y: indexTip.y * height
-      };
+      // Map camera coordinates to canvas coordinates using active area calibration
+      let fingerPos;
+      if (typeof mapCameraToCanvas === 'function') {
+        fingerPos = mapCameraToCanvas(indexTip.x, indexTip.y, width, height);
+      } else {
+        // Fallback to direct mapping if function not available
+        fingerPos = {
+          x: indexTip.x * width,
+          y: indexTip.y * height
+        };
+      }
 
       if (handedness === 'Left') {
         leftHandDetected = true;
@@ -121,8 +115,7 @@ function draw() {
         rightIndexPos = fingerPos;
       }
 
-      drawIndex(hand);
-      drawConnections(hand);
+      // Hand landmarks are now drawn on camera preview only
     }
   }
   drawQuadrantOverlay();
@@ -307,10 +300,6 @@ if (rightIndexPos) {
   // --- Draw trail symbols (snake formation) ---
   updateAndDrawTrail();
 
-  // End circular mask
-  drawingContext.restore();
-  pop();
-
   // --- Overlay UI (outside the mask) ---
   //write on top left corner
   fill(255,0,0);
@@ -319,6 +308,22 @@ if (rightIndexPos) {
   textFont('Courier New');
   textAlign(LEFT, TOP);
   text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
+  
+  // --- Camera preview in top right corner ---
+  if (typeof getCameraPreview === 'function') {
+    let preview = getCameraPreview();
+    if (preview) {
+      push();
+      let previewW = 320; // Bigger preview width
+      let previewH = 240; // Bigger preview height
+      let previewX = width - previewW - 10; // 10px from right edge
+      let previewY = 10; // 10px from top edge
+      
+      // Draw preview (no border, not mirrored)
+      image(preview, previewX, previewY, previewW, previewH);
+      pop();
+    }
+  }
   
   /* drawColorOverlay(); */
 
