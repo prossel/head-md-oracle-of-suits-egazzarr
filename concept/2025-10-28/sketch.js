@@ -132,7 +132,9 @@ function draw() {
       // Hand landmarks are now drawn on camera preview only
     }
   }
-  drawQuadrantOverlay();
+  if (calibrationMode) {
+    drawQuadrantOverlay();
+  }
 
   // --- Draw red indicator dot before hand is detected (Q3, 1200 ring) ---
   if (!leftHandDetected && !rightHandDetected) {
@@ -316,12 +318,12 @@ if (rightIndexPos) {
 
   // --- Overlay UI (outside the mask) ---
   //write on top left corner
-  fill(255);
-  noStroke();
-  textSize(14);
-  textFont('Courier New');
-  textAlign(LEFT, TOP);
-  text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
+  // fill(255);
+  // noStroke();
+  // textSize(14);
+  // textFont('Courier New');
+  // textAlign(LEFT, TOP);
+  // text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
   
   // --- Camera preview in top right corner ---
   if (calibrationMode && typeof getCameraPreview === 'function') {
