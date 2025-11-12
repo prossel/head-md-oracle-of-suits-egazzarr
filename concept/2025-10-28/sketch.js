@@ -48,8 +48,11 @@ function windowResized() {
 
 
 function draw() {
-  // --- White background everywhere ---
-  background(255);
+  if (calibrationMode) {
+    background(255); // white background in calibration mode
+  } else {
+    background(0); // black background otherwise
+  }
   
   // Create circular area constants
   const diameter = height * 4 / 5;
@@ -353,7 +356,11 @@ function drawCircleWithNumbers() {
   const radius = diameter / 2;
 
   // main circle outline
-  noFill();
+  if (calibrationMode) {
+    fill(0, 255, 0); // green in calibration mode
+  } else {
+    fill(255); // white otherwise
+  }
   stroke(0);
   strokeWeight(1);
   ellipse(cx, cy, diameter, diameter);
