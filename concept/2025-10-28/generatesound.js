@@ -47,6 +47,7 @@
 
   // ============ Q1: MONOSYNTH - Sustained notes changing with years ============
   window.playQ1 = function() {
+    console.log('playQ1() called');
     if (!ready || isQ1Playing) return;
     q1Synth = Monosynth({ gain: .8, attack: 44, decay: 44100 }).connect();
     q1Synth.note(110);
@@ -74,6 +75,7 @@
 
   // ============ Q2: SOFT MELODY SEQUENCER ============
   window.playQ2 = function() {
+    console.log('playQ2() called');
     if (!ready || isQ2Playing) return;
     
     // Use FM for a softer, different timbre
@@ -118,6 +120,7 @@
 
   window.fadeOutQ2 = function(duration = 600) {
     if (!q2Synth || !isQ2Playing) return;
+    console.log('fadeOutQ2() called');
     
     // Stop sequencer immediately to prevent new notes
     if (q2Seq) q2Seq.stop();
@@ -147,6 +150,7 @@
   };
 
   window.stopQ2 = function() {
+    console.log('stopQ2() called');
     if (q2Seq) q2Seq.stop();
     if (q2Synth) q2Synth.disconnect();
     q2Synth = null;
@@ -158,6 +162,7 @@
 
   // ============ Q3: KICK DRUM + SEQUENCER - Rhythmic ============
   window.playQ3 = function() {
+    console.log('playQ3() called');
     if (!ready || isQ3Playing) return;
     
     q3Kick = Kick({ gain: .8 }).connect();
@@ -194,6 +199,7 @@
   };
 
   window.stopQ3 = function() {
+    console.log('stopQ3() called');
     if (q3Seq) q3Seq.stop();
     if (q3Kick) q3Kick.disconnect();
     q3Kick = null;
@@ -205,6 +211,7 @@
 
   // ============ Q4: PolyFM with Reverb & Chorus - Long sustain chord ============
   window.playQ4 = function() {
+    console.log('playQ4() called');
     if (!ready || isQ4Playing) return;
     
     // Create effects chain: PolyFM -> Chorus -> Freeverb -> output
@@ -240,6 +247,7 @@
   };
 
   window.stopQ4 = function() {
+    console.log('stopQ4() called');
     if (q4Fm) q4Fm.disconnect();
     if (q4Chorus) q4Chorus.disconnect();
     if (q4Verb) q4Verb.disconnect();
