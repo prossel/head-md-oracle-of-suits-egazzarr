@@ -1,5 +1,8 @@
 // sketch.js
 
+let diameter; // diameter of the main circle, defined in setup()
+let diameterRatio = 0.8; // ratio of height used for diameter (persistent)
+
 let bgImg;
 
 // Hand detection globals
@@ -36,6 +39,13 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Load saved diameter ratio if present
+  const savedRatio = parseFloat(localStorage.getItem('diameterRatio'));
+  if (!isNaN(savedRatio)) {
+    diameterRatio = savedRatio;
+  }
+  diameter = height * diameterRatio;
+
 
   // Initialize MediaPipe
   setupHands();
@@ -44,15 +54,20 @@ function setup() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // Recompute diameter based on stored ratio
+  diameter = height * diameterRatio;
 }
 
 
 function draw() {
-  // --- White background everywhere ---
-  background(255);
+  if (calibrationMode) {
+    background(255); // white background in calibration mode
+  } else {
+    background(0); // black background otherwise
+  }
   
   // Create circular area constants
-  const diameter = height * 4 / 5;
+  //const diameter = height * 4 / 5;
   const cx = width / 2;
   const cy = height / 2;
   
@@ -117,7 +132,9 @@ function draw() {
       // Hand landmarks are now drawn on camera preview only
     }
   }
-  drawQuadrantOverlay();
+  if (calibrationMode) {
+    drawQuadrantOverlay();
+  }
 
   // --- Draw red indicator dot before hand is detected (Q3, 1200 ring) ---
   if (!leftHandDetected && !rightHandDetected) {
@@ -301,20 +318,20 @@ if (rightIndexPos) {
 
   // --- Overlay UI (outside the mask) ---
   //write on top left corner
-  fill(255);
-  noStroke();
-  textSize(14);
-  textFont('Courier New');
-  textAlign(LEFT, TOP);
-  text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
+  // fill(255);
+  // noStroke();
+  // textSize(14);
+  // textFont('Courier New');
+  // textAlign(LEFT, TOP);
+  // text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
   
   // --- Camera preview in top right corner ---
-  if (typeof getCameraPreview === 'function') {
+  if (calibrationMode && typeof getCameraPreview === 'function') {
     let preview = getCameraPreview();
     if (preview) {
       push();
-      let previewW = 320; // Bigger preview width
-      let previewH = 240; // Bigger preview height
+      let previewW = 640; // Bigger preview width
+      let previewH = 480; // Bigger preview height
       let previewX = width - previewW - 10; // 10px from right edge
       let previewY = 10; // 10px from top edge
       
@@ -347,13 +364,17 @@ function getQuadrant(fingerPos) {
 }
 
 function drawCircleWithNumbers() {
-  const diameter = height * 4 / 5;
+  //const diameter = height * 4 / 5;
   const cx = width / 2;
   const cy = height / 2;
   const radius = diameter / 2;
 
   // main circle outline
-  noFill();
+  if (calibrationMode) {
+    fill(0, 255, 0); // green in calibration mode
+  } else {
+    fill(255); // white otherwise
+  }
   stroke(0);
   strokeWeight(1);
   ellipse(cx, cy, diameter, diameter);
@@ -394,6 +415,19 @@ function drawCircleWithNumbers() {
   }
   
   textStyle(NORMAL); // Reset text style
+}
+
+// --- Diameter adjustment & persistence helpers ---
+function updateDiameter(newRatio) {
+  // Clamp ratio so circle remains visible (30% to 95% of height)
+  diameterRatio = constrain(newRatio, 0.3, 0.95);
+  diameter = height * diameterRatio;
+  try {
+    localStorage.setItem('diameterRatio', diameterRatio.toFixed(4));
+  } catch (e) {
+    // Ignore storage errors (e.g., privacy mode)
+    console.warn('Could not persist diameterRatio', e);
+  }
 }
 
 // --- Overlay: show which quadrant each finger is in ---
