@@ -14,10 +14,17 @@ let activeArea = loadActiveArea() || {
 };
 const MOVE_STEP = 5;    // pixels to move with arrow keys
 const SIZE_STEP = 5;   // pixels to resize with SHIFT + arrows
+
 let calibrationMode = false;  // calibration mode off by default
-let positionMode = false;  // position adjustment mode
-let sizeMode = false;      // size adjustment mode
-let diameterMode = false;  // diameter adjustment mode
+
+// Enum for adjustment modes
+const AdjustmentMode = {
+  NONE: 'none',
+  POSITION: 'position',
+  SIZE: 'size',
+  DIAMETER: 'diameter'
+};
+let adjustmentMode = AdjustmentMode.NONE;  // current adjustment mode
 let saveTimeout = null;    // for debouncing saves
 
 // Load active area from localStorage
@@ -177,7 +184,7 @@ function handleActiveAreaControls() {
   let changed = false;
   
   // Handle position mode
-  if (positionMode) {
+  if (adjustmentMode === AdjustmentMode.POSITION) {
     if (keyIsDown(LEFT_ARROW)) {
       activeArea.x = max(0, activeArea.x - moveStep);
       changed = true;
@@ -197,7 +204,7 @@ function handleActiveAreaControls() {
   }
   
   // Handle size mode
-  if (sizeMode) {
+  else if (adjustmentMode === AdjustmentMode.SIZE) {
     if (keyIsDown(LEFT_ARROW)) {
       activeArea.width = max(50, activeArea.width - sizeStep);
       changed = true;
@@ -217,7 +224,7 @@ function handleActiveAreaControls() {
   }
   
   // Handle diameter mode
-  if (diameterMode && typeof updateDiameter === 'function' && typeof diameterRatio !== 'undefined') {
+  else if (adjustmentMode === AdjustmentMode.DIAMETER && typeof updateDiameter === 'function' && typeof diameterRatio !== 'undefined') {
     if (keyIsDown(UP_ARROW) || keyIsDown(RIGHT_ARROW)) {
       updateDiameter(diameterRatio + diameterStep);
       // No changed = true because updateDiameter handles its own saving
@@ -326,9 +333,20 @@ function displayActiveAreaInfoOnPreview() {
     offscreen.text(`Size: ${activeArea.width} x ${activeArea.height}`, 15, 45);
     
     // Show current mode
-    let modeText = positionMode ? '[P] Position mode' : 
-                   (sizeMode ? '[S] Size mode' : 
-                   (diameterMode ? '[D] Diameter mode' : 'P: pos | S: size | D: diam'));
+    let modeText;
+    switch (adjustmentMode) {
+      case AdjustmentMode.POSITION:
+        modeText = '[P] Position mode';
+        break;
+      case AdjustmentMode.SIZE:
+        modeText = '[S] Size mode';
+        break;
+      case AdjustmentMode.DIAMETER:
+        modeText = '[D] Diameter mode';
+        break;
+      default:
+        modeText = 'P: pos | S: size | D: diam';
+    }
     offscreen.text(modeText, 15, 60);
     
     // Show diameter info (accessing from sketch.js globals)
@@ -400,36 +418,30 @@ document.addEventListener('keydown', (e) => {
   
   // Toggle position mode with P key
   if (e.key === 'p' || e.key === 'P') {
-    positionMode = !positionMode;
-    if (positionMode) {
-      sizeMode = false; // Turn off size mode
-      diameterMode = false; // Turn off diameter mode
-    }
-    console.log(`Position mode: ${positionMode ? 'ON' : 'OFF'}`);
+    adjustmentMode = (adjustmentMode === AdjustmentMode.POSITION) 
+      ? AdjustmentMode.NONE 
+      : AdjustmentMode.POSITION;
+    console.log(`Position mode: ${adjustmentMode === AdjustmentMode.POSITION ? 'ON' : 'OFF'}`);
   }
   
   // Toggle size mode with S key
   if (e.key === 's' || e.key === 'S') {
-    sizeMode = !sizeMode;
-    if (sizeMode) {
-      positionMode = false; // Turn off position mode
-      diameterMode = false; // Turn off diameter mode
-    }
-    console.log(`Size mode: ${sizeMode ? 'ON' : 'OFF'}`);
+    adjustmentMode = (adjustmentMode === AdjustmentMode.SIZE) 
+      ? AdjustmentMode.NONE 
+      : AdjustmentMode.SIZE;
+    console.log(`Size mode: ${adjustmentMode === AdjustmentMode.SIZE ? 'ON' : 'OFF'}`);
   }
   
   // Toggle diameter mode with D key
   if (e.key === 'd' || e.key === 'D') {
-    diameterMode = !diameterMode;
-    if (diameterMode) {
-      positionMode = false; // Turn off position mode
-      sizeMode = false; // Turn off size mode
-    }
-    console.log(`Diameter mode: ${diameterMode ? 'ON' : 'OFF'}`);
+    adjustmentMode = (adjustmentMode === AdjustmentMode.DIAMETER) 
+      ? AdjustmentMode.NONE 
+      : AdjustmentMode.DIAMETER;
+    console.log(`Diameter mode: ${adjustmentMode === AdjustmentMode.DIAMETER ? 'ON' : 'OFF'}`);
   }
   
-  // Prevent default browser behavior for arrow keys when in position, size, or diameter mode
-  if ((positionMode || sizeMode || diameterMode) && 
+  // Prevent default browser behavior for arrow keys when in any adjustment mode
+  if (adjustmentMode !== AdjustmentMode.NONE && 
       (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || 
        e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
     e.preventDefault();
