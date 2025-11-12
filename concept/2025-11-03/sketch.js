@@ -6,7 +6,7 @@ function setup() {
   textAlign(CENTER, CENTER);
   textSize(30);
   fill(255);
-  diameter = height * 4 / 5;
+  diameter = height * 2/ 5;
   cx = width / 2;
   cy = height / 2;
   radius = diameter / 2;
@@ -18,7 +18,7 @@ function draw() {
 }
 
 function drawCircleWithNumbers() {
-  const diameter = height * 4 / 5;
+ 
   const cx = width / 2;
   const cy = height / 2;
   const radius = diameter / 2;

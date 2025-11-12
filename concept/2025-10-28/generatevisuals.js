@@ -219,10 +219,13 @@ function symbolgenTrail(x, y, quadrant) {
     
     // Add new symbol at beginning
     symbolTrail.unshift(new TrailSymbol(x, y, img));
-    
+
     // Update last position
     lastTrailPos.x = x;
     lastTrailPos.y = y;
+
+    // Indicate that a new trail particle was created
+    return true;
   }
 }
 

@@ -102,8 +102,15 @@ function draw() {
   leftIndexPos = null;
   rightIndexPos = null;
 
+  // Track which quadrants are currently active (any hand)
+  let currentlyInQ1 = false;
+  let currentlyInQ2 = false;
+  let currentlyInQ3 = false;
+  let currentlyInQ4 = false;
+
   // --- Process hands ---
   if (detections && detections.multiHandLandmarks && detections.multiHandLandmarks.length > 0) {
+    console.log(`Number of hands detected: ${detections.multiHandLandmarks.length}`);
     for (let i = 0; i < detections.multiHandLandmarks.length; i++) {
       let hand = detections.multiHandLandmarks[i];
       let handedness = detections.multiHandedness[i].label;
@@ -121,6 +128,59 @@ function draw() {
         };
       }
 
+      // Determine quadrant for this finger and generate visuals/sounds per-hand
+      const quadrant = getQuadrant(fingerPos);
+      if (quadrant !== "None") {
+  const created = (typeof symbolgenTrail === 'function') ? symbolgenTrail(fingerPos.x, fingerPos.y, quadrant) : false;
+
+        // Q1: Monosynth - sustained notes
+        if (quadrant === "1") {
+          currentlyInQ1 = true;
+          if (window.isQ1Playing && !window.isQ1Playing()) {
+            window.playQ1();
+          }
+          if (window.updateQ1Note && window.getYearFromFingerPos) {
+            const year = window.getYearFromFingerPos(fingerPos);
+            if (year) window.updateQ1Note(year);
+          }
+        }
+
+        // Q2: Soft melody sequencer — only start when a particle was created
+        if (quadrant === "2") {
+          if (created) currentlyInQ2 = true;
+          if (created && window.isQ2Playing && !window.isQ2Playing()) {
+            window.playQ2();
+          } else if (created && window.playQ2 && !window.isQ2Playing()) {
+            window.playQ2();
+          }
+          if (window.updateQ2Melody && window.getYearFromFingerPos) {
+            const year = window.getYearFromFingerPos(fingerPos);
+            if (year) window.updateQ2Melody(year);
+          }
+        }
+
+        // Q3: Kick drum with sequencer
+        if (quadrant === "3") {
+          currentlyInQ3 = true;
+          if (window.isQ3Playing && !window.isQ3Playing()) {
+            window.playQ3();
+          }
+          if (window.modulateQ3ByCircles && window.getYearFromFingerPos) {
+            const year = window.getYearFromFingerPos(fingerPos);
+            if (year) window.modulateQ3ByCircles(year);
+          }
+        }
+
+        // Q4: PolyFM - constant chord
+        if (quadrant === "4") {
+          currentlyInQ4 = true;
+          if (window.isQ4Playing && !window.isQ4Playing()) {
+            window.playQ4();
+          }
+        }
+      }
+
+      // still set left/right indexes for overlay/debug
       if (handedness === 'Left') {
         leftHandDetected = true;
         leftIndexPos = fingerPos;
@@ -128,15 +188,13 @@ function draw() {
         rightHandDetected = true;
         rightIndexPos = fingerPos;
       }
-
-      // Hand landmarks are now drawn on camera preview only
     }
-  }
+    }
   if (calibrationMode) {
     drawQuadrantOverlay();
   }
 
-  // --- Draw red indicator dot before hand is detected (Q3, 1200 ring) ---
+/*   // --- Draw red indicator dot before hand is detected (Q3, 1200 ring) ---
   if (!leftHandDetected && !rightHandDetected) {
     const cx = width / 2;
     const cy = height / 2;
@@ -151,121 +209,9 @@ function draw() {
     fill(255, 0, 0, 200); // red, alpha 0.5
     noStroke();
     ellipse(dotX, dotY, 30, 30);
-  }
+  } */
 
-  // --- Generate snake trail symbols based on finger position and quadrant ---
-  let currentlyInQ1 = false;
-  let currentlyInQ2 = false;
-  let currentlyInQ3 = false;
-  let currentlyInQ4 = false;
-  
-  if (leftIndexPos) {
-    const leftQuadrant = getQuadrant(leftIndexPos);
-    if (leftQuadrant !== "None") {
-      symbolgenTrail(leftIndexPos.x, leftIndexPos.y, leftQuadrant);
-      
-      // Q1: Monosynth - sustained notes
-      if (leftQuadrant === "1") {
-        currentlyInQ1 = true;
-        if (window.isQ1Playing && !window.isQ1Playing()) {
-          window.playQ1();
-        }
-        // Update note based on year ring
-        if (window.updateQ1Note && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(leftIndexPos);
-          if (year) window.updateQ1Note(year);
-        }
-      }
-      
-      // Q2: Soft melody sequencer
-      if (leftQuadrant === "2") {
-        currentlyInQ2 = true;
-        if (window.isQ2Playing && !window.isQ2Playing()) {
-          window.playQ2();
-        }
-        // Update melody based on distance from center
-        if (window.updateQ2Melody && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(leftIndexPos);
-          if (year) window.updateQ2Melody(year);
-        }
-      }
-      
-      // Q3: Kick drum with sequencer
-      if (leftQuadrant === "3") {
-        currentlyInQ3 = true;
-        if (window.isQ3Playing && !window.isQ3Playing()) {
-          window.playQ3();
-        }
-        // Modulate sequence based on year ring
-        if (window.modulateQ3ByCircles && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(leftIndexPos);
-          if (year) window.modulateQ3ByCircles(year);
-        }
-      }
-      
-      // Q4: PolyFM - constant chord
-      if (leftQuadrant === "4") {
-        currentlyInQ4 = true;
-        if (window.isQ4Playing && !window.isQ4Playing()) {
-          window.playQ4();
-        }
-      }
-    }
-  }
 
-  if (rightIndexPos) {
-    const rightQuadrant = getQuadrant(rightIndexPos);
-    if (rightQuadrant !== "None") {
-      symbolgenTrail(rightIndexPos.x, rightIndexPos.y, rightQuadrant);
-      
-      // Q1: Monosynth - sustained notes
-      if (rightQuadrant === "1") {
-        currentlyInQ1 = true;
-        if (window.isQ1Playing && !window.isQ1Playing()) {
-          window.playQ1();
-        }
-        // Update note based on year ring
-        if (window.updateQ1Note && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(rightIndexPos);
-          if (year) window.updateQ1Note(year);
-        }
-      }
-      
-      // Q2: Soft melody sequencer
-      if (rightQuadrant === "2") {
-        currentlyInQ2 = true;
-        if (window.isQ2Playing && !window.isQ2Playing()) {
-          window.playQ2();
-        }
-        // Update melody based on distance from center
-        if (window.updateQ2Melody && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(rightIndexPos);
-          if (year) window.updateQ2Melody(year);
-        }
-      }
-      
-      // Q3: Kick drum with sequencer
-      if (rightQuadrant === "3") {
-        currentlyInQ3 = true;
-        if (window.isQ3Playing && !window.isQ3Playing()) {
-          window.playQ3();
-        }
-        // Modulate sequence based on year ring
-        if (window.modulateQ3ByCircles && window.getYearFromFingerPos) {
-          const year = window.getYearFromFingerPos(rightIndexPos);
-          if (year) window.modulateQ3ByCircles(year);
-        }
-      }
-      
-      // Q4: PolyFM - constant chord
-      if (rightQuadrant === "4") {
-        currentlyInQ4 = true;
-        if (window.isQ4Playing && !window.isQ4Playing()) {
-          window.playQ4();
-        }
-      }
-    }
-  }
 
   // Stop sounds when finger leaves quadrants
   if (wasInQ1 && !currentlyInQ1 && window.isQ1Playing && window.isQ1Playing()) {
