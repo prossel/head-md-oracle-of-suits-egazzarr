@@ -1,5 +1,8 @@
 // sketch.js
 
+let diameter; // diameter of the main circle, defined in setup()
+let diameterRatio = 0.8; // ratio of height used for diameter (persistent)
+
 let bgImg;
 
 // Hand detection globals
@@ -36,6 +39,13 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Load saved diameter ratio if present
+  const savedRatio = parseFloat(localStorage.getItem('diameterRatio'));
+  if (!isNaN(savedRatio)) {
+    diameterRatio = savedRatio;
+  }
+  diameter = height * diameterRatio;
+
 
   // Initialize MediaPipe
   setupHands();
@@ -44,6 +54,8 @@ function setup() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // Recompute diameter based on stored ratio
+  diameter = height * diameterRatio;
 }
 
 
@@ -55,7 +67,7 @@ function draw() {
   }
   
   // Create circular area constants
-  const diameter = height * 4 / 5;
+  //const diameter = height * 4 / 5;
   const cx = width / 2;
   const cy = height / 2;
   
@@ -312,12 +324,12 @@ if (rightIndexPos) {
   text(`TOUCH THE DOT\n\n\nDid you know that \nin the Mamluk empire, in 1200,\none of the symbols on playing cards \nwere polo sticks?`, 10, 10);
   
   // --- Camera preview in top right corner ---
-  if (typeof getCameraPreview === 'function') {
+  if (calibrationMode && typeof getCameraPreview === 'function') {
     let preview = getCameraPreview();
     if (preview) {
       push();
-      let previewW = 320; // Bigger preview width
-      let previewH = 240; // Bigger preview height
+      let previewW = 640; // Bigger preview width
+      let previewH = 480; // Bigger preview height
       let previewX = width - previewW - 10; // 10px from right edge
       let previewY = 10; // 10px from top edge
       
@@ -350,7 +362,7 @@ function getQuadrant(fingerPos) {
 }
 
 function drawCircleWithNumbers() {
-  const diameter = height * 4 / 5;
+  //const diameter = height * 4 / 5;
   const cx = width / 2;
   const cy = height / 2;
   const radius = diameter / 2;
@@ -401,6 +413,19 @@ function drawCircleWithNumbers() {
   }
   
   textStyle(NORMAL); // Reset text style
+}
+
+// --- Diameter adjustment & persistence helpers ---
+function updateDiameter(newRatio) {
+  // Clamp ratio so circle remains visible (30% to 95% of height)
+  diameterRatio = constrain(newRatio, 0.3, 0.95);
+  diameter = height * diameterRatio;
+  try {
+    localStorage.setItem('diameterRatio', diameterRatio.toFixed(4));
+  } catch (e) {
+    // Ignore storage errors (e.g., privacy mode)
+    console.warn('Could not persist diameterRatio', e);
+  }
 }
 
 // --- Overlay: show which quadrant each finger is in ---

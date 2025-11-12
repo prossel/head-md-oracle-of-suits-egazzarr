@@ -17,6 +17,7 @@ const SIZE_STEP = 5;   // pixels to resize with SHIFT + arrows
 let calibrationMode = false;  // calibration mode off by default
 let positionMode = false;  // position adjustment mode
 let sizeMode = false;      // size adjustment mode
+let diameterMode = false;  // diameter adjustment mode
 let saveTimeout = null;    // for debouncing saves
 
 // Load active area from localStorage
@@ -171,6 +172,7 @@ function handleActiveAreaControls() {
   // Determine step size: use STEP if SHIFT is held, otherwise 1 pixel
   const moveStep = keyIsDown(SHIFT) ? MOVE_STEP : 1;
   const sizeStep = keyIsDown(SHIFT) ? SIZE_STEP : 1;
+  const diameterStep = keyIsDown(SHIFT) ? 0.005 : 0.001; // 5% or 1% adjustment
   
   let changed = false;
   
@@ -211,6 +213,18 @@ function handleActiveAreaControls() {
     if (keyIsDown(DOWN_ARROW)) {
       activeArea.height = min(offscreen.height - activeArea.y, activeArea.height + sizeStep);
       changed = true;
+    }
+  }
+  
+  // Handle diameter mode
+  if (diameterMode && typeof updateDiameter === 'function' && typeof diameterRatio !== 'undefined') {
+    if (keyIsDown(UP_ARROW) || keyIsDown(RIGHT_ARROW)) {
+      updateDiameter(diameterRatio + diameterStep);
+      // No changed = true because updateDiameter handles its own saving
+    }
+    if (keyIsDown(DOWN_ARROW) || keyIsDown(LEFT_ARROW)) {
+      updateDiameter(diameterRatio - diameterStep);
+      // No changed = true because updateDiameter handles its own saving
     }
   }
   
@@ -302,7 +316,7 @@ function displayActiveAreaInfoOnPreview() {
     offscreen.push();
     offscreen.fill(0, 0, 0, 150);
     offscreen.noStroke();
-    offscreen.rect(10, 10, 280, 110);
+    offscreen.rect(10, 10, 280, 145);
     
     offscreen.fill(255);
     offscreen.textSize(12);
@@ -312,11 +326,19 @@ function displayActiveAreaInfoOnPreview() {
     offscreen.text(`Size: ${activeArea.width} x ${activeArea.height}`, 15, 45);
     
     // Show current mode
-    let modeText = positionMode ? '[P] Position mode' : (sizeMode ? '[S] Size mode' : 'P: pos | S: size');
+    let modeText = positionMode ? '[P] Position mode' : 
+                   (sizeMode ? '[S] Size mode' : 
+                   (diameterMode ? '[D] Diameter mode' : 'P: pos | S: size | D: diam'));
     offscreen.text(modeText, 15, 60);
     
-    offscreen.text(`SHIFT: fast adjust`, 15, 75);
-    offscreen.text(`C: toggle calibration`, 15, 90);
+    // Show diameter info (accessing from sketch.js globals)
+    if (typeof diameter !== 'undefined' && typeof diameterRatio !== 'undefined') {
+        offscreen.text(`Diameter: ${Math.round(diameter)} px`, 15, 75);
+        offscreen.text(`Ratio: ${(diameterRatio * 100).toFixed(1)}%`, 15, 90);
+    }
+    
+    offscreen.text(`SHIFT: fast adjust`, 15, 105);
+    offscreen.text(`Arrows: adjust | C: toggle`, 15, 120);
     offscreen.pop();
 }
 
@@ -381,6 +403,7 @@ document.addEventListener('keydown', (e) => {
     positionMode = !positionMode;
     if (positionMode) {
       sizeMode = false; // Turn off size mode
+      diameterMode = false; // Turn off diameter mode
     }
     console.log(`Position mode: ${positionMode ? 'ON' : 'OFF'}`);
   }
@@ -390,12 +413,23 @@ document.addEventListener('keydown', (e) => {
     sizeMode = !sizeMode;
     if (sizeMode) {
       positionMode = false; // Turn off position mode
+      diameterMode = false; // Turn off diameter mode
     }
     console.log(`Size mode: ${sizeMode ? 'ON' : 'OFF'}`);
   }
   
-  // Prevent default browser behavior for arrow keys when in position or size mode
-  if ((positionMode || sizeMode) && 
+  // Toggle diameter mode with D key
+  if (e.key === 'd' || e.key === 'D') {
+    diameterMode = !diameterMode;
+    if (diameterMode) {
+      positionMode = false; // Turn off position mode
+      sizeMode = false; // Turn off size mode
+    }
+    console.log(`Diameter mode: ${diameterMode ? 'ON' : 'OFF'}`);
+  }
+  
+  // Prevent default browser behavior for arrow keys when in position, size, or diameter mode
+  if ((positionMode || sizeMode || diameterMode) && 
       (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || 
        e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
     e.preventDefault();
